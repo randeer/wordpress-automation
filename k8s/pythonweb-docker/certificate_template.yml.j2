@@ -1,0 +1,11 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ useraccount }}-tls
+  namespace: {{ useraccount }}
+spec:
+  secretName: {{ useraccount }}-com-tls
+  issuerRef:
+    name: letsencrypt-{{ useraccount }}
+  dnsNames:
+  - {{ domainname }}

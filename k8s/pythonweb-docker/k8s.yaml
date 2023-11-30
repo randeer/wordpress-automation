@@ -1,0 +1,63 @@
+---
+- name: This is my app
+  hosts: localhost
+  #become: yes
+
+  vars:
+    useraccount: "{{ useraccount }}"
+    useremail: "{{ useremail }}"
+    domainnamel: "{{ domainname }}"
+
+  tasks:
+    - name: create namespace
+      shell: kubectl create ns {{ useraccount }} --kubeconfig=config
+
+    - name: create a folder
+      shell: mkdir /data/{{ useraccount }}
+
+    - name: Create issuer YAML file
+      template:
+        src: issuer_template.yml.j2
+        dest: /data/{{ useraccount }}/local-issuer.yaml
+
+    - name: Create certificate YAML file
+      template:
+        src: certificate_template.yml.j2
+        dest: /data/{{ useraccount }}/certificate.yaml
+
+    - name: Create ingress YAML file
+      template:
+        src: ingress_template.yml.j2
+        dest: /data/{{ useraccount }}/ingress.yaml
+
+    - name: Create service YAML file
+      template:
+        src: servicetemplate.yml.j2
+        dest: /data/{{ useraccount }}/service.yaml
+
+    - name: Create Wordpress YAML file
+      template:
+        src: wordpress_template.yml.j2
+        dest: /data/{{ useraccount }}/wordpress.yaml
+
+    - name: create WordPress Database
+      #become: yes
+      shell: mysql -h docker.lala-1992.xyz -u root -prashmikamanawadu -e "CREATE DATABASE \`{{ useraccount }}\`;"
+
+    - name: create WordPress user
+      #become: yes
+      shell: |
+        mysql -h docker.lala-1992.xyz -u root -prashmikamanawadu -e "USE {{ useraccount }}; CREATE USER '{{ useraccount }}'@'%' IDENTIFIED BY '{{ useraccount }}';"
+        mysql -h docker.lala-1992.xyz -u root -prashmikamanawadu -e "USE {{ useraccount }}; GRANT ALL PRIVILEGES ON {{ useraccount }}.* TO '{{ useraccount }}'@'%';"
+        mysql -h docker.lala-1992.xyz -u root -prashmikamanawadu -e "FLUSH PRIVILEGES;"
+      environment:
+        DB_NAME: "{{ useraccount }}"
+
+    - name: create the deployment
+      #ecome: yes
+      shell: |
+        kubectl apply -f /data/{{ useraccount }}/local-issuer.yaml --kubeconfig=config
+        kubectl apply -f /data/{{ useraccount }}/certificate.yaml --kubeconfig=config
+        kubectl apply -f /data/{{ useraccount }}/wordpress.yaml --kubeconfig=config
+        kubectl apply -f /data/{{ useraccount }}/service.yaml --kubeconfig=config
+        kubectl apply -f /data/{{ useraccount }}/ingress.yaml --kubeconfig=config

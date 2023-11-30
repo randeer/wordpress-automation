@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  labels:
+    app: {{ useraccount }}l
+  name: {{ useraccount }}
+  namespace: {{ useraccount }}
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: {{ domainname }}
+    http:
+      paths:
+      - backend:
+          service:
+            name: {{ useraccount }}
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - {{ domainname }}
+    secretName: {{ useraccount }}-com-tls
