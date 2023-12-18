@@ -4,6 +4,7 @@ import os
 import subprocess
 import shutil
 import random
+from PIL import Image
 
 # MySQL configurations
 db_host = "172.17.0.2"
@@ -29,23 +30,51 @@ def create_connection():
 
 # Streamlit UI code
 def main():
-    st.title("Wordpress Automation")
 
-    # Sidebar with form inputs
-    st.sidebar.header("User Information")
-    name = st.sidebar.text_input("Name")
-    username = st.sidebar.text_input("Username")
-    mobile = st.sidebar.text_input("Mobile")
-    domain = st.sidebar.text_input("Domain")
-    email = st.sidebar.text_input("Email")
+  # Set page title to "lala-auto"
+  #st.set_page_config(page_title="lala-auto")
 
-    # Submit button
-    if st.sidebar.button("Submit"):
-        # Call the submit function
-        result = submit(name, username, mobile, domain, email)
+  # Set the favicon using HTML and Markdown
+  #favicon_path = "favicon.ico"
 
-        # Display the result
-        st.success(result)
+  # Update the image path to your actual location
+  image_directory = "/home/randeer/myapp/python-web/favicon.ico"
+
+  try:
+  # Open the image using PIL
+    image = Image.open(image_directory)
+    PAGE_CONFIG = {"page_title": "lala-auto",
+                   "page_icon": image}
+    st.set_page_config(**PAGE_CONFIG)
+  except FileNotFoundError:
+    st.error(f"File not found: {image_directory}")
+
+
+  # Centered title with inline CSS
+  st.empty()
+  st.markdown("<h1 style='text-align: center;'>Wordpress Automation</h1>", unsafe_allow_html=True)
+  st.empty()
+
+  # Picture on the left side
+  my_pic = "my-pic.jpg"  # Update path as needed
+  st.image(my_pic, use_column_width=True)
+
+  # Form on the right side
+  with st.sidebar.expander("User Information", expanded=True):
+    name = st.text_input("Name")
+    username = st.text_input("Username")
+    mobile = st.text_input("Mobile")
+    domain = st.text_input("Domain")
+    email = st.text_input("Email")
+
+  # Submit button
+  if st.sidebar.button("Submit"):
+    # Call the submit function
+    result = submit(name, username, mobile, domain, email)
+
+    # Display the result below the picture
+    if result:
+      st.write(result)
 
 # Submit function
 def submit(name, username, mobile, domain, email):
